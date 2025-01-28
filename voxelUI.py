@@ -20,7 +20,7 @@ from bpy.props import IntProperty, IntVectorProperty, FloatVectorProperty, Float
 dir = os.path.dirname(bpy.data.filepath)
 if not dir in sys.path:
     sys.path.append(dir)
- 
+    
 
 import Voxels
 import imp
@@ -30,8 +30,8 @@ imp.reload(Voxels)
 #custom properties to main panel
 class VoxelProperties(bpy.types.PropertyGroup):
     voxel_dimension_vector : IntVectorProperty(name="Dimensions", default=(3, 3, 3), min=1)
-    noise_scale_vector:  FloatVectorProperty(name="Noise Scale", default=(1.0, 1.0, 1.0))
-    noise_offset_vector:  FloatVectorProperty(name="Noise Offset", default=(1.0, 1.0, 1.0))
+    noise_scale_vector:  FloatVectorProperty(name="Noise Scale")
+    noise_offset_vector:  FloatVectorProperty(name="Noise Offset")
     noise_cutoff: FloatProperty(name="Noise CutOff", default=0.33)
     voxel_smooth_amount: FloatProperty(name="Voxel_Smooth Amount")
     voxel_tool_add: FloatProperty(name="tool add", default=-0.4)
@@ -41,12 +41,16 @@ class VoxelProperties(bpy.types.PropertyGroup):
     voxel_number_prob: IntProperty(name="number probed")
     voxel_uv_scale: IntProperty(name="uv scale", default=2, min=1)
     voxel_buffer: FloatProperty(name="uv buffer", default=0, min=0, max=1)
-    
+    voxel_rayscan_dir: IntVectorProperty(name="Rayscan dir", min=-1, max=1)
+    voxel_topCover: FloatProperty(name="top cover",default = -0.5, min=-1, max=0)
+    voxel_bottomCover: FloatProperty(name="bottom cover",default = 0.8, min=0, max=1)
+    voxel_brushwidth: FloatProperty(name="brushwidth",default = 1, min=0)
+
     subpanel_noise_status: BoolProperty(name="Show noise options", default=False)
     subpanel_add_voxel: BoolProperty(name="Show add voxel", default=False)
     subpanel_voxel_settings: BoolProperty(name="Show voxel options", default=False)
     subpanel_obj_to_voxel: BoolProperty(name="object to voxel", default=False)
-    subpanel_voxel_tool: BoolProperty(name="tool for editoting voxel", default=False)
+    subpanel_voxel_tool: BoolProperty(name="tool for editing voxel", default=False)
     subpanel_uvs: BoolProperty(name="uv settings", default=False)
     
     noise_select_enum : EnumProperty(
@@ -62,6 +66,14 @@ class VoxelProperties(bpy.types.PropertyGroup):
                 ('VORONOI_F2F1', "Voronoi_F2F1", ""),
                 ('VORONOI_CRACKLE', "Voronoi_crackle", ""),
                 ('CELLNOISE', "Cellnoise", "")
+        ]
+    )
+    
+    voxel_type_select_enum : EnumProperty(
+        name= "Type",
+        description="Voxel type to be used",
+        items=[('CUBES', "Cubes", ""),
+                ('MARCHING_CUBES', "marching_cubes", "")       
         ]
     )
 
@@ -96,6 +108,8 @@ class VOXEL_PT_main_panel(bpy.types.Panel):
         layout.prop(voxel_menu_var, "subpanel_voxel_settings") #voxel options
         if voxel_menu_var.subpanel_voxel_settings:
             box2 = layout.box()
+            box2.label(text='voxel type')
+            box2.prop(voxel_menu_var, "voxel_type_select_enum")
             box2.label(text='smooth tool set voxel type to smooth amount')
             box2.prop(voxel_menu_var, "voxel_smooth_amount")
             box2.operator(ModalOperator_voxel_set_smoothness.bl_idname, text=ModalOperator_voxel_set_smoothness.bl_label)
@@ -103,6 +117,8 @@ class VOXEL_PT_main_panel(bpy.types.Panel):
             box2.operator("voxel.fill_voxel")
             box2.operator("voxel.replace_content")
             box2.operator("voxel.rayscan_replace_content")
+            box2.label(text='rayscan direction 0 0 1 is up')
+            box2.prop(voxel_menu_var, "voxel_rayscan_dir")
         
         layout.prop(voxel_menu_var, "subpanel_obj_to_voxel") #object to voxel
         if voxel_menu_var.subpanel_obj_to_voxel:
@@ -116,9 +132,12 @@ class VOXEL_PT_main_panel(bpy.types.Panel):
             box4.label(text='Q add, W edit, right click or esc done')
             box4.label(text='can place on intersecting meshes')
             box4.operator(ModalOperator_voxel_tool.bl_idname, text=ModalOperator_voxel_tool.bl_label)
+            box4.operator(ModalOperator_voxel_paint_tool.bl_idname, text=ModalOperator_voxel_paint_tool.bl_label)
             box4.label(text='adjust position of edit, add if needed')
             box4.prop(voxel_menu_var, "voxel_tool_add")
             box4.prop(voxel_menu_var, "voxel_tool_edit")
+            box4.prop(voxel_menu_var, "voxel_brushwidth")
+             
         
         layout.prop(voxel_menu_var, "subpanel_noise_status") #noise
         if voxel_menu_var.subpanel_noise_status:
@@ -134,6 +153,11 @@ class VOXEL_PT_main_panel(bpy.types.Panel):
             box5 = layout.box()
             box5.prop(voxel_menu_var, "voxel_uv_scale")
             box5.prop(voxel_menu_var, "voxel_buffer")
+            box5.label(text='cubematching texture cover')
+            box5.prop(voxel_menu_var, "voxel_topCover")
+            box5.prop(voxel_menu_var, "voxel_bottomCover")
+            
+
 
 
 class VOXEL_OT_add_voxel(bpy.types.Operator):
@@ -188,7 +212,7 @@ class VOXEL_OT_replace_content(bpy.types.Operator):
 
         return {'FINISHED'}
     
-
+    
 class VOXEL_OT_rayscan_replace_content(bpy.types.Operator):
     bl_label = "rayscan replace (1 with 2)"
     bl_idname = "voxel.rayscan_replace_content"
@@ -200,7 +224,7 @@ class VOXEL_OT_rayscan_replace_content(bpy.types.Operator):
         Voxels.rayscan_replace_content(bpy.context.object, context, voxel_menu_var)
 
         return {'FINISHED'}
-    
+
 
 class VOXEL_OT_add_noise(bpy.types.Operator):
     bl_label = "Add noise (fill 2 with 1)"
@@ -254,6 +278,49 @@ class ModalOperator_voxel_tool(bpy.types.Operator):
             
             add = False
             Voxels.tool_trace_voxel(self.mouse_x, self.mouse_y, bpy.context.object, context, add, voxel_menu_var)
+            
+       
+        elif event.type in {'RIGHTMOUSE', 'ESC'}:
+            return {'FINISHED'}
+
+        return {'RUNNING_MODAL'} 
+        #return {'PASS_THROUGH'} #taken bindings seem to mess with it
+    
+    def invoke(self, context, event):
+        if context.object:
+            context.window_manager.modal_handler_add(self)
+            return {'RUNNING_MODAL'}
+        else:
+            self.report({'WARNING'}, "No active object, could not finish")
+            return {'CANCELLED'}
+
+
+class ModalOperator_voxel_paint_tool(bpy.types.Operator):
+    """bruch add and edit voxel tool"""
+    bl_idname = "object.modal_operator_paint_add_edit"
+    bl_label = "Voxel paint tool (Q=1 W=2)"
+
+    mouse_x: IntProperty()
+    mouse_y: IntProperty()
+
+    def modal(self, context, event):
+        if event.type == "MOUSEMOVE":
+            self.mouse_x = event.mouse_region_x
+            self.mouse_y = event.mouse_region_y
+        
+        if (event.type == 'Q') and (event.value == 'RELEASE'): #add
+            scene = context.scene
+            voxel_menu_var = scene.voxel_menu_var
+            
+            add = False
+            Voxels.tool_paint_cell_values(self.mouse_x, self.mouse_y, bpy.context.object, context, add, voxel_menu_var)
+
+        if (event.type == 'W') and (event.value == 'RELEASE'): #edit
+            scene = context.scene
+            voxel_menu_var = scene.voxel_menu_var
+            
+            add = False
+            Voxels.tool_paint_cell_values(self.mouse_x, self.mouse_y, bpy.context.object, context, add, voxel_menu_var)
             
        
         elif event.type in {'RIGHTMOUSE', 'ESC'}:
@@ -345,7 +412,7 @@ class ModalOperator_voxel_set_smoothness(bpy.types.Operator):
             return {'CANCELLED'}
 
 
-classes = [VoxelProperties, VOXEL_PT_main_panel, VOXEL_OT_add_voxel, VOXEL_OT_fill_voxel, VOXEL_OT_replace_content, VOXEL_OT_rayscan_replace_content, VOXEL_OT_update_voxel, VOXEL_OT_add_noise, VOXEL_OT_voxify, ModalOperator_voxel_tool, ModalOperator_voxel_probe, ModalOperator_voxel_set_smoothness]
+classes = [VoxelProperties, VOXEL_PT_main_panel, VOXEL_OT_add_voxel, VOXEL_OT_fill_voxel, VOXEL_OT_replace_content, VOXEL_OT_rayscan_replace_content, VOXEL_OT_update_voxel, VOXEL_OT_add_noise, VOXEL_OT_voxify, ModalOperator_voxel_tool, ModalOperator_voxel_paint_tool, ModalOperator_voxel_probe, ModalOperator_voxel_set_smoothness]
 
 
 def register():
