@@ -1,9 +1,9 @@
 # Voxels-For-Blender
-make voxel objects in blender.
+I added support for marching cubes. 
 
-This is made up of two scrips Voxels.py and voxelUI.py. Both are needed. I don't know how to get this to work as a plugin. It can be used by making and saving a scene and copying both scrips into what ever directory you saved the scene. Then you can open them in the blender text editor which is most easily accessed from the scripting tab way on the top right hand side. push the play button on the voxelUI.py script and a tab named voxel should appear on the UI in the 3d view. You can push 'n' in the 3d view to make the UI visible if its not visible.
+This is made up of 5 scrips Voxels.py, voxelUI.py, marching_cubes_table.py, VoxelsCubes.py, VoxelMarchingCubes.py. I don't know how to get this to work as a plugin. It can be used by making and saving a scene and all the scripts into what ever directory you saved the scene. Then you can open them in the blender text editor which is most easily accessed from the scripting tab way on the top right hand side. push the play button on the voxelUI.py script and a tab named voxel should appear on the UI in the 3d view. You can push 'n' in the 3d view to make the UI visible if its not visible.
 
-The script works by adding extra information to a mesh object so these can be duplicated and edited as any normal mesh object. Be aware that if you do edit the mesh using voxel functions will delete what ever edits you made. Undo functionality works somewhat but not consistently. 
+The script works by adding extra information to a mesh object so these can be duplicated and edited as any normal mesh object. Be aware that if you do edit the mesh using voxel functions will delete what ever edits you made. Undo functionality works somewhat but not consistently. Voxels works well with modifiers including the subdivision modifier. 
 
 Update Voxel: if you change any of the property settings the voxel will not automatically update. That's what this button is for.
 
@@ -28,8 +28,10 @@ will place voxels at any object within the voxel volume. So good for making obje
 
 tool for editing voxel:
 Voxel tool(Q=1, W=2): Use Q to add voxels and W to change existing voxel types. Escape or right click will finish the tool.
+Voxel paint tool(Q=1, W=2): Similar to the voxel tool except add or edit large number of voxels in a sphere area at once defined by the brushwidth setting
 tool add:
 tool edit: these values can be used to finetune where the voxel tool adds and edits. They may need adjusting if you edit smooth voxels or scaled to voxel object. Often easier to set the smoothness to zero make the changes and set the smoothness back.
+brushwidth: the radius for the Voxel paint tool to use
 
 Show noise options:
 add noise(fill 2 with 1): good for making voxel terrain and caves. select a value for the voxels you want for number 1 and 0 for number 2 to place noise in an empty voxel volume. select 0 for number 1 and what ever your ground is made up of to make caves in a solid volume.
@@ -41,3 +43,5 @@ uv settings:
 This voxel tool will automatically generate uv's for the voxels. The uv's start in the bottom left corner then move to right and up for each additional block. each block is made up of top center and bottom uv's so that things like grass covering the top can be mapped. Ideal uv map is 3 times as tall as its wide else the blocks may seem squashed.
 uv scale: the amount of uvs to the side of a square. scale of 10 for example will mean theres 100 (10 x 10) uv maps in total each made up of 3 squares one for top center and bottom.
 uv buffer: the gap between squares on the uv map. Stops bleeding which causes ugly lines. low value such as 0.02 should be sufficient.
+top cover: used by marching cubes and affects the amount of top texture mapped to the voxels. Marching cubes use the same texture map as normal voxels.
+bottom cover: used by marching cubes and affects the amount of bottom texture mapped to the voxels. Marching cubes use the same texture map as normal voxels.
