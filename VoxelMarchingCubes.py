@@ -164,8 +164,11 @@ def generate_marching_cubes_voxels(smooth_array, vox_array, vert_coords, face_ve
                     b = (MCT.corner_offsets[e10] +  MCT.corner_offsets[e11]) / 2;
                     c = (MCT.corner_offsets[e20] +  MCT.corner_offsets[e21]) / 2;
                     
+                    #ratio a to b corner offsets are voxel address.
+                    #frac = smooth_array[MCT.corner_offsets[e00]] / (smooth_array[MCT.corner_offsets[e00]] + smooth_array[MCT.corner_offsets[e01]]) 
+                    #doesnt work most likeley end up 0/0 so no smoothing         
                     
-                    #theres a bug here so ugly still buggy
+                    
                     vox_content_num = 0;
                     if vox_array[x][y][z] != 0:
                         vox_content_num = vox_array[x][y][z]

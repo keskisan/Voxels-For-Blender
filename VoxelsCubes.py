@@ -166,53 +166,59 @@ def calculate_smooth_array(smooth_array, vox_array):
         for y in range(len(vox_array[x])):
             for z in range(len(vox_array[x][y])):
                 if vox_array[x][y][z] > 0:
-                    if vertex_smooth_array[x][y][z] < -100:
-                        vertex_smooth_array[x][y][z] = smooth_array[int(vox_array[x][y][z])]
+                    if vox_array[x][y][z] >= len(smooth_array): #vallue can be set to anything even outside array
+                        smoothfactor = 0
                     else:
-                       vertex_smooth_array[x][y][z] = vertex_smooth_array[x][y][z] +  smooth_array[int(vox_array[x][y][z])]
+                        smoothfactor = smooth_array[int(vox_array[x][y][z])] 
+                    
+                    
+                    if vertex_smooth_array[x][y][z] < -100:
+                        vertex_smooth_array[x][y][z] = smoothfactor
+                    else:
+                       vertex_smooth_array[x][y][z] = vertex_smooth_array[x][y][z] +  smoothfactor
                     vertex_smooth_count[x][y][z] += 1
                         
                     if vertex_smooth_array[x + 1][y][z] < -100:
-                        vertex_smooth_array[x + 1][y][z] =  smooth_array[int(vox_array[x][y][z])]
+                        vertex_smooth_array[x + 1][y][z] =  smoothfactor
                     else:
-                        vertex_smooth_array[x + 1][y][z] = vertex_smooth_array[x + 1][y][z] +  smooth_array[int(vox_array[x][y][z])]
+                        vertex_smooth_array[x + 1][y][z] = vertex_smooth_array[x + 1][y][z] +  smoothfactor
                     vertex_smooth_count[x + 1][y][z] += 1 
                           
                     if vertex_smooth_array[x][y + 1][z] < -100:
-                        vertex_smooth_array[x][y + 1][z] =  smooth_array[int(vox_array[x][y][z])]
+                        vertex_smooth_array[x][y + 1][z] =  smoothfactor
                     else:
-                        vertex_smooth_array[x][y + 1][z] = vertex_smooth_array[x][y + 1][z] +  smooth_array[int(vox_array[x][y][z])] 
+                        vertex_smooth_array[x][y + 1][z] = vertex_smooth_array[x][y + 1][z] +  smoothfactor 
                     vertex_smooth_count[x][y + 1][z] += 1
                              
                     if vertex_smooth_array[x + 1][y + 1][z] < -100:
-                        vertex_smooth_array[x + 1][y + 1][z] =  smooth_array[int(vox_array[x][y][z])]
+                        vertex_smooth_array[x + 1][y + 1][z] =  smoothfactor
                     else:
-                        vertex_smooth_array[x + 1][y + 1][z] = vertex_smooth_array[x + 1][y + 1][z] +  smooth_array[int(vox_array[x][y][z])]
+                        vertex_smooth_array[x + 1][y + 1][z] = vertex_smooth_array[x + 1][y + 1][z] + smoothfactor
                     vertex_smooth_count[x + 1][y + 1][z] += 1
                         
                         
                     if vertex_smooth_array[x][y][z + 1] < -100:
-                        vertex_smooth_array[x][y][z + 1] =  smooth_array[int(vox_array[x][y][z])]
+                        vertex_smooth_array[x][y][z + 1] =  smoothfactor
                     else:
-                        vertex_smooth_array[x][y][z + 1] = vertex_smooth_array[x][y][z + 1] +  smooth_array[int(vox_array[x][y][z])]
+                        vertex_smooth_array[x][y][z + 1] = vertex_smooth_array[x][y][z + 1] +  smoothfactor
                     vertex_smooth_count[x][y][z + 1] += 1
                         
                     if vertex_smooth_array[x + 1][y][z + 1] < -100:
-                        vertex_smooth_array[x + 1][y][z + 1] =  smooth_array[int(vox_array[x][y][z])]
+                        vertex_smooth_array[x + 1][y][z + 1] = smoothfactor
                     else:
-                        vertex_smooth_array[x + 1][y][z + 1] = vertex_smooth_array[x + 1][y][z + 1] +  smooth_array[int(vox_array[x][y][z])] 
+                        vertex_smooth_array[x + 1][y][z + 1] = vertex_smooth_array[x + 1][y][z + 1] + smoothfactor 
                     vertex_smooth_count[x + 1][y][z + 1] += 1
                      
                     if vertex_smooth_array[x][y + 1][z + 1] < -100:
-                        vertex_smooth_array[x][y + 1][z + 1] =  smooth_array[int(vox_array[x][y][z])]
+                        vertex_smooth_array[x][y + 1][z + 1] = smoothfactor
                     else:
-                        vertex_smooth_array[x][y + 1][z + 1] = vertex_smooth_array[x][y + 1][z + 1] +  smooth_array[int(vox_array[x][y][z])]
+                        vertex_smooth_array[x][y + 1][z + 1] = vertex_smooth_array[x][y + 1][z + 1] + smoothfactor
                     vertex_smooth_count[x][y + 1][z + 1] += 1
                     
                     if vertex_smooth_array[x + 1][y + 1][z + 1] < -100:
-                        vertex_smooth_array[x + 1][y + 1][z + 1] =  smooth_array[int(vox_array[x][y][z])]
+                        vertex_smooth_array[x + 1][y + 1][z + 1] = smoothfactor
                     else:
-                        vertex_smooth_array[x + 1][y + 1][z + 1] = vertex_smooth_array[x + 1][y + 1][z + 1] +  smooth_array[int(vox_array[x][y][z])] 
+                        vertex_smooth_array[x + 1][y + 1][z + 1] = vertex_smooth_array[x + 1][y + 1][z + 1] + smoothfactor
                     vertex_smooth_count[x + 1][y + 1][z + 1] += 1
                     
     for x in range(len(vertex_smooth_array)):
